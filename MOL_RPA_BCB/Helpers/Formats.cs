@@ -40,7 +40,6 @@ namespace Helpers
             }
             else
             {
-                // Se a conversão falhar, podemos lançar uma exceção personalizada
                 throw new HelperException("Número inválido fornecido para conversão.");
             }
         }

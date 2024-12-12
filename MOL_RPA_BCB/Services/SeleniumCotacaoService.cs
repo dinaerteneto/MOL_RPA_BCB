@@ -3,6 +3,7 @@ using OpenQA.Selenium.Support.UI;
 using Models;
 using Helpers;
 using Helpers.Selenium;
+using Helpers.Logging;
 
 namespace Services
 {
@@ -36,7 +37,7 @@ namespace Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao processar cotação: {ex.Message}");
+                Logger.LogError($"Ao processar cotação: {ex.Message}");
             }
             finally
             {
@@ -66,11 +67,11 @@ namespace Services
 
             foreach (var (selector, description) in menuSteps)
             {
-                Console.WriteLine($"Clicando em: {description}");
+                Logger.LogInfo($"Clicando em: {description}");
                 SeleniumHelper.ClickElement(wait, selector);
             }
 
-            Console.WriteLine("Todos os menus navegados com sucesso!");
+            Logger.LogSuccess("Todos os menus navegados com sucesso!");
         }
 
         /// <summary>
@@ -87,36 +88,33 @@ namespace Services
             IWebElement iframe = wait.Until(d => d.FindElement(By.CssSelector("body > app-root > app-root > div > div > main > dynamic-comp > div > div:nth-child(3) > div.col-md-8 > div > iframe")));
             _driver.SwitchTo().Frame(iframe);
 
-            Console.WriteLine("Contexto alterado para o iframe.");
-
             // Selecionar o radio button
             IWebElement radioButton = wait.Until(d => d.FindElement(By.CssSelector("input[type='radio'][name='RadOpcao'][value='1']")));
             radioButton.Click();
-            Console.WriteLine("Primeira opção do radio button selecionada!");
+            Logger.LogInfo("Primeira opção do radio button selecionada!");
 
             // Preencher datas
             var dataInicial = inicio.ToString("ddMMyyyy");
             var dataFinal = fim.ToString("ddMMyyyy");
             SeleniumHelper.FillInputField(wait, "#DATAINI", dataInicial);
-            Console.WriteLine($"Data inicial digitida: {dataInicial}");
+            Logger.LogInfo($"Data inicial digitida: {dataInicial}");
             SeleniumHelper.FillInputField(wait, "#DATAFIM", dataFinal);
-            Console.WriteLine($"Data final digitida: {dataFinal}");
-            Console.WriteLine("Datas preenchidas!");
+            Logger.LogInfo($"Data final digitida: {dataFinal}");
+            Logger.LogInfo("Datas preenchidas!");
 
             // Selecionar moeda
             IWebElement moedaInput = wait.Until(d => d.FindElement(By.CssSelector("body > div > form > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(2) > select")));
             moedaInput.Click();
             moedaInput.SendKeys(moedaBase);
             moedaInput.SendKeys(Keys.Enter);
-            Console.WriteLine("Moeda selecionada!");
+            Logger.LogInfo("Moeda selecionada!");
 
             // Submeter formulário
             SeleniumHelper.ClickElement(wait, "body > div > form > div > input");
-            Console.WriteLine("Formulário submetido!");
+            Logger.LogInfo("Formulário submetido!");
 
             // Voltar ao contexto principal
             _driver.SwitchTo().DefaultContent();
-            Console.WriteLine("Contexto alterado de volta para o conteúdo principal.");
         }
 
         /// <summary>
@@ -129,8 +127,6 @@ namespace Services
             // Alternar para o iframe, se necessário
             IWebElement iframe = wait.Until(d => d.FindElement(By.CssSelector("body > app-root > app-root > div > div > main > dynamic-comp > div > div:nth-child(3) > div.col-md-8 > div > iframe")));
             _driver.SwitchTo().Frame(iframe);
-
-            Console.WriteLine("Contexto alterado para o iframe.");
 
             // Localizar a tabela
             IWebElement tabela = wait.Until(d => d.FindElement(By.CssSelector("table.tabela")));
