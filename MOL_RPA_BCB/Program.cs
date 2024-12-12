@@ -20,8 +20,6 @@ class Program
                 new DateTime(2024, 1, 5),
                 "Euro"
             );
-
-            cotacoes.ForEach(c =>  Console.WriteLine("teste ok."));
         }
     }
 }

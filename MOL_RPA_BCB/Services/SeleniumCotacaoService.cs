@@ -30,6 +30,8 @@ public class SeleniumCotacaoService : ICotacaoService
 
             NavegarParaFormulario(wait);
             SubmeterFormulario(wait, inicio, fim, moedaBase);
+            cotacoes = ExtrairCotacoes(wait, moedaBase);
+            ExibirCotacoes(cotacoes);
 
         }
         catch (Exception ex)
@@ -115,6 +117,88 @@ public class SeleniumCotacaoService : ICotacaoService
         // Voltar ao contexto principal
         _driver.SwitchTo().DefaultContent();
         Console.WriteLine("Contexto alterado de volta para o conteúdo principal.");
+    }
+
+
+    /// <summary>
+    /// Método responsável por extrair os dados da tabela para o domínio
+    /// </summary>
+    /// <param name="wait"></param>
+    /// <param name="moedaBase"></param>
+    private List<Cotacao> ExtrairCotacoes(WebDriverWait wait, string moedaBase)
+    {
+        // Alternar para o iframe, se necessário
+        IWebElement iframe = wait.Until(d => d.FindElement(By.CssSelector("body > app-root > app-root > div > div > main > dynamic-comp > div > div:nth-child(3) > div.col-md-8 > div > iframe")));
+        _driver.SwitchTo().Frame(iframe);
+
+        Console.WriteLine("Contexto alterado para o iframe.");
+
+        // Localizar a tabela
+        IWebElement tabela = wait.Until(d => d.FindElement(By.CssSelector("table.tabela")));
+        var linhas = tabela.FindElements(By.TagName("tr")).Skip(2); // Pular as 2 primeiras linhas de cabeçalho
+
+        var cotacoes = new List<Cotacao>();
+        var culturaInvariante = System.Globalization.CultureInfo.InvariantCulture;
+
+        // Iterar pelas linhas da tabela e extrair dados
+        foreach (var linha in linhas)
+        {
+            var colunas = linha.FindElements(By.TagName("td"));
+
+            if (colunas.Count == 6)
+            {
+                string data = colunas[0].Text;
+                // string tipo = colunas[1].Text;
+                string tipo = moedaBase;
+                string compra = colunas[2].Text;
+                string venda = colunas[3].Text;
+                string paridadeCompra = colunas[4].Text;
+                string paridadeVenda = colunas[5].Text;
+
+                // Tentativa de conversão da data para DateTime usando o formato dd/MM/yyyy
+                DateTime dataConvertida;
+                bool dataValida = DateTime.TryParseExact(data, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out dataConvertida);
+
+                if (!dataValida)
+                {
+                    // Caso a data não seja válida, você pode lançar uma exceção ou tratar o erro de forma adequada.
+                    throw new FormatException($"Data inválida: {data}");
+                }
+
+
+                var cotacao = new Cotacao
+                {
+                    NomeMoeda = moedaBase,
+                    CotacaoCompra = decimal.Parse(compra.Replace(",", "."), culturaInvariante),
+                    CotacaoVenda = decimal.Parse(venda.Replace(",", "."), culturaInvariante),
+                    ParidadeCompra = decimal.Parse(paridadeCompra.Replace(",", "."), culturaInvariante),
+                    ParidadeVenda = decimal.Parse(paridadeVenda.Replace(",", "."), culturaInvariante),
+                    Data = dataConvertida
+                };
+
+                cotacoes.Add(cotacao);
+            }
+        }
+        return cotacoes;
+    }
+
+
+
+    private void ExibirCotacoes(List<Cotacao> cotacoes)
+    {
+        Console.WriteLine($"{"Data",-15} {"Tipo",-10} {"Compra",-10} {"Venda",-10} {"Paridade Compra",-15} {"Paridade Venda",-15}");
+        Console.WriteLine(new string('-', 80));
+
+        // Exibir cada cotação com formatação
+        foreach (var cotacao in cotacoes)
+        {
+            Console.WriteLine($"{cotacao.Data.ToString("dd/MM/yyyy"),-15} "  // Exibindo a data no formato dd/MM/yyyy
+                              + $"{cotacao.NomeMoeda,-10} "
+                              + $"{cotacao.CotacaoCompra.ToString(),-10} "   // Formatação para 4 casas decimais
+                              + $"{cotacao.CotacaoVenda.ToString(),-10} "
+                              + $"{cotacao.ParidadeCompra.ToString(),-15} "
+                              + $"{cotacao.ParidadeVenda.ToString(),-15}");
+        }
     }
 
 
