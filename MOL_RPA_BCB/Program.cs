@@ -2,9 +2,8 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using Core.Logging;
 using Helpers;
+using Services.Quotation;
 using Models;
-using Services.Cotacao;
-
 class Program
 {
     static async Task Main(string[] args)
@@ -27,7 +26,7 @@ class Program
             .AddSingleton<IWebDriver>(provider =>
             {
                 var options = new ChromeOptions();
-                // options.AddArgument("--headless");
+                //options.AddArgument("--headless");
                 options.AddArgument("--disable-gpu");
                 options.AddArgument("--no-sandbox");
 
@@ -36,42 +35,42 @@ class Program
             })
             .AddSingleton(typeof(Core.Logging.ILogger), typeof(DotNetLogger<Program>))
             .AddSingleton<string>(baseUrl) // Registra o baseUrl como uma string
-            .AddTransient<ICotacaoService, SeleniumCotacaoService>()
+            .AddTransient<IQuotationService, SeleniumQuotationService>()
             .BuildServiceProvider();
 
-        // Obter o logger para o Program
+        // Obter o logger para o Program'
         var logger = serviceProvider.GetRequiredService<Core.Logging.ILogger>();
         logger.LogInformation("Aplicação iniciada.");
 
         // Obter o serviço de cotações
-        ICotacaoService? cotacaoService = serviceProvider.GetService<ICotacaoService>();
+        IQuotationService? quotationService = serviceProvider.GetService<IQuotationService>();
 
-        if (cotacaoService != null)
+        if (quotationService != null)
         {
-            var cotacoes = await cotacaoService.ObterCotacaoesAsync(
+            var quotations = await quotationService.GetQuotationsAsync(
                 DateTime.Parse(startDate),
                 DateTime.Parse(endDate),
-                moedaBase: currencyName
+                currencyBase: currencyName
             );
-            ExibirCotacoes(cotacoes);
+            ShowQuotations(quotations);
         }
     }
 
 
-    static void ExibirCotacoes(List<Cotacao> cotacoes)
+    static void ShowQuotations(List<Quotation> quotations)
     {
         Console.WriteLine($"{"Data",-15} {"Tipo",-10} {"Compra",-10} {"Venda",-10} {"Paridade Compra",-15} {"Paridade Venda",-15}");
         Console.WriteLine(new string('-', 80));
 
         // Exibir cada cotação com formatação
-        foreach (var cotacao in cotacoes)
+        foreach (var quotation in quotations)
         {
-            Console.WriteLine($"{cotacao.Data.ToString("dd/MM/yyyy"),-15} "  // Exibindo a data no formato dd/MM/yyyy
-                              + $"{cotacao.NomeMoeda,-10} "
-                              + $"{cotacao.CotacaoCompra.ToString(),-10} "   // Formatação para 4 casas decimais
-                              + $"{cotacao.CotacaoVenda.ToString(),-10} "
-                              + $"{cotacao.ParidadeCompra.ToString(),-15} "
-                              + $"{cotacao.ParidadeVenda.ToString(),-15}");
+            Console.WriteLine($"{quotation.Date.ToString("dd/MM/yyyy"),-15} "  // Exibindo a data no formato dd/MM/yyyy
+                              + $"{quotation.CurrencyName,-10} "
+                              + $"{quotation.QuotationBuy.ToString(),-10} "   // Formatação para 4 casas decimais
+                              + $"{quotation.QuotationSell.ToString(),-10} "
+                              + $"{quotation.ParityBuy.ToString(),-15} "
+                              + $"{quotation.ParitySell.ToString(),-15}");
         }
     }
 

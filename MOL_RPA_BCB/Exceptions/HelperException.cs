@@ -1,6 +1,6 @@
 ﻿namespace Exceptions
 {
-    public class HelperException : CotacaoException
+    public class HelperException : AppException
     {
         public HelperException() : base() { }
 

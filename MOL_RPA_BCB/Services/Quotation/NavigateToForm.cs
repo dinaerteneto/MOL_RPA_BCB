@@ -2,7 +2,7 @@
 using OpenQA.Selenium.Support.UI;
 using Helpers.Selenium;
 
-namespace Services.Cotacao
+namespace Services.Quotation
 {
     public class NavigateToForm
     {

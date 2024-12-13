@@ -1,28 +1,30 @@
-﻿using OpenQA.Selenium;
+﻿using Exceptions;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using Services.Cotacao;
 
-namespace Services.Cotacao
+namespace Services.Quotation
 {
-    public class SeleniumCotacaoService : ICotacaoService
+    public class SeleniumQuotationService : IQuotationService
     {
         private readonly IWebDriver _driver;
-        private readonly ILogger<SeleniumCotacaoService> _logger;
+        private readonly ILogger<SeleniumQuotationService> _logger;
         private readonly string _baseUrl;
 
-        public SeleniumCotacaoService(IWebDriver driver, ILogger<SeleniumCotacaoService> logger, string baseUrl)
+        public SeleniumQuotationService(IWebDriver driver, ILogger<SeleniumQuotationService> logger, string baseUrl)
         {
             _driver = driver;
             _logger = logger;
             _baseUrl = baseUrl;
         }
 
-        async Task<List<Models.Cotacao>> ICotacaoService.ObterCotacaoesAsync(
+        async Task<List<Models.Quotation>> IQuotationService.GetQuotationsAsync(
             DateTime inicio,
             DateTime fim,
             string moedaBase
         )
         {
-            var cotacoes = new List<Models.Cotacao>();
+            var cotacoes = new List<Models.Quotation>();
 
             try
             {
@@ -43,13 +45,21 @@ namespace Services.Cotacao
                 submit.Execute(wait, inicio, fim, moedaBase);
 
                 // Extrair as cotações
-                var extract = new ExtractCotations(_driver, _logger);
+                var extract = new ExtractQuotations(_driver, _logger);
                 cotacoes = extract.Execute(wait, moedaBase);
 
             }
+            catch (WebDriverException ex)
+            {
+                var message = $" WebDriver error on process quotations: {ex.Message}";
+                _logger.LogError(message);
+                throw new AppException(message, ex);
+            }
             catch (Exception ex)
             {
-                _logger.LogError($"Ao processar cotação: {ex.Message}");
+                var message = $"unexpected error while extracting quotations: {ex.Message}";
+                _logger.LogError(message);
+                throw new AppException(message, ex); ;
             }
             finally
             {
