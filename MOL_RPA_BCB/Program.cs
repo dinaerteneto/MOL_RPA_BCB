@@ -1,9 +1,9 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using Core.Logging;
-using Services;
 using Helpers;
 using Models;
+using Services.Cotacao;
 
 class Program
 {

@@ -1,4 +1,4 @@
-﻿namespace Services;
+﻿namespace Services.Cotacao;
 
 using Models;
 
