@@ -1,6 +1,4 @@
-﻿using Exceptions;
-
-namespace Helpers.Exceptions
+﻿namespace Exceptions
 {
     public class HelperException : CotacaoException
     {

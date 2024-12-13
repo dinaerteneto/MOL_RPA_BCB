@@ -1,28 +1,36 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
-using Models;
-using Helpers;
 using Helpers.Selenium;
-using Helpers.Logging;
+using Helpers.Formats;
+using Models;
 
 namespace Services
 {
     public class SeleniumCotacaoService : ICotacaoService
     {
         private readonly IWebDriver _driver;
-        public SeleniumCotacaoService(IWebDriver driver)
+        private readonly ILogger<SeleniumCotacaoService> _logger;
+        private readonly string _baseUrl;
+
+        public SeleniumCotacaoService(IWebDriver driver, ILogger<SeleniumCotacaoService> logger, string baseUrl)
         {
             _driver = driver;
+            _logger = logger;
+            _baseUrl = baseUrl;
         }
 
-        async Task<List<Cotacao>> ICotacaoService.ObterCotacaoesAsync(DateTime inicio, DateTime fim, string moedaBase)
+        async Task<List<Cotacao>> ICotacaoService.ObterCotacaoesAsync(
+            DateTime inicio,
+            DateTime fim, 
+            string moedaBase
+        )
         {
             var cotacoes = new List<Cotacao>();
 
             try
             {
                 // navegar para o site  
-                _driver.Navigate().GoToUrl("https://www.bcb.gov.br/");
+                _driver.Navigate().GoToUrl(_baseUrl);
                 _driver.Manage().Window.Maximize();
 
                 // implementar navegaçõe e extração dos dados usando Selenium
@@ -37,7 +45,7 @@ namespace Services
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Ao processar cotação: {ex.Message}");
+                _logger.LogError($"Ao processar cotação: {ex.Message}");
             }
             finally
             {
@@ -67,11 +75,11 @@ namespace Services
 
             foreach (var (selector, description) in menuSteps)
             {
-                Logger.LogInfo($"Clicando em: {description}");
+                _logger.LogDebug($"Clicando em: {description}");
                 SeleniumHelper.ClickElement(wait, selector);
             }
 
-            Logger.LogSuccess("Todos os menus navegados com sucesso!");
+            _logger.LogDebug("Todos os menus navegados com sucesso!");
         }
 
         /// <summary>
@@ -91,27 +99,27 @@ namespace Services
             // Selecionar o radio button
             IWebElement radioButton = wait.Until(d => d.FindElement(By.CssSelector("input[type='radio'][name='RadOpcao'][value='1']")));
             radioButton.Click();
-            Logger.LogInfo("Primeira opção do radio button selecionada!");
+            _logger.LogDebug("Primeira opção do radio button selecionada!");
 
             // Preencher datas
             var dataInicial = inicio.ToString("ddMMyyyy");
             var dataFinal = fim.ToString("ddMMyyyy");
             SeleniumHelper.FillInputField(wait, "#DATAINI", dataInicial);
-            Logger.LogInfo($"Data inicial digitida: {dataInicial}");
+            _logger.LogDebug($"Data inicial digitida: {dataInicial}");
             SeleniumHelper.FillInputField(wait, "#DATAFIM", dataFinal);
-            Logger.LogInfo($"Data final digitida: {dataFinal}");
-            Logger.LogInfo("Datas preenchidas!");
+            _logger.LogDebug($"Data final digitida: {dataFinal}");
+            _logger.LogDebug("Datas preenchidas!");
 
             // Selecionar moeda
             IWebElement moedaInput = wait.Until(d => d.FindElement(By.CssSelector("body > div > form > table:nth-child(3) > tbody > tr:nth-child(4) > td:nth-child(2) > select")));
             moedaInput.Click();
             moedaInput.SendKeys(moedaBase);
             moedaInput.SendKeys(Keys.Enter);
-            Logger.LogInfo("Moeda selecionada!");
+            _logger.LogDebug("Moeda selecionada!");
 
             // Submeter formulário
             SeleniumHelper.ClickElement(wait, "body > div > form > div > input");
-            Logger.LogInfo("Formulário submetido!");
+            _logger.LogDebug("Formulário submetido!");
 
             // Voltar ao contexto principal
             _driver.SwitchTo().DefaultContent();

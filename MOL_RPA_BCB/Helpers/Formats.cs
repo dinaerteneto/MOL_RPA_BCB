@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using Helpers.Exceptions;
+using Exceptions;
 
-namespace Helpers
+namespace Helpers.Formats
 {
     public static class Formats
     {

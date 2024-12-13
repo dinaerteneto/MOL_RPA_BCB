@@ -1,25 +1,57 @@
-using Models;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using Core.Logging;
 using Services;
+using Helpers;
+using Models;
 
 class Program
 {
     static async Task Main(string[] args)
     {
+        // Carregar configurações usando o helper
+        IConfiguration configuration = ConfigurationHelper.LoadConfiguration();
+
+        // Acessar valores diretamente do appsettings.json
+        var baseUrl = configuration["Settings:BaseUrl"];
+        var startDate = configuration["Cotation:Params:StartDate"];
+        var endDate = configuration["Cotation:Params:EndDate"];
+        var currencyName = configuration["Cotation:Params:CurrencyName"];
+
+        // Configuração dos serviços
         var serviceProvider = new ServiceCollection()
-            .AddSingleton<IWebDriver, ChromeDriver>()
+            .AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConsole(); // Adiciona suporte ao log no console
+            })
+            .AddSingleton<IWebDriver>(provider =>
+            {
+                var options = new ChromeOptions();
+                // options.AddArgument("--headless");
+                options.AddArgument("--disable-gpu");
+                options.AddArgument("--no-sandbox");
+
+                return new ChromeDriver(options);
+
+            })
+            .AddSingleton(typeof(Core.Logging.ILogger), typeof(DotNetLogger<Program>))
+            .AddSingleton<string>(baseUrl) // Registra o baseUrl como uma string
             .AddTransient<ICotacaoService, SeleniumCotacaoService>()
             .BuildServiceProvider();
 
+        // Obter o logger para o Program
+        var logger = serviceProvider.GetRequiredService<Core.Logging.ILogger>();
+        logger.LogInformation("Aplicação iniciada.");
+
+        // Obter o serviço de cotações
         ICotacaoService? cotacaoService = serviceProvider.GetService<ICotacaoService>();
 
         if (cotacaoService != null)
         {
             var cotacoes = await cotacaoService.ObterCotacaoesAsync(
-                new DateTime(2024, 1, 1),
-                new DateTime(2024, 1, 5),
-                "Euro"
+                DateTime.Parse(startDate),
+                DateTime.Parse(endDate),
+                moedaBase: currencyName
             );
             ExibirCotacoes(cotacoes);
         }
