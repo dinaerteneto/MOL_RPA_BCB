@@ -1,8 +1,8 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using Helpers.Selenium;
-using Helpers.Formats;
 using Models;
+using Helpers.Extensions;
 
 namespace Services
 {
@@ -161,11 +161,11 @@ namespace Services
                     var cotacao = new Cotacao
                     {
                         NomeMoeda = moedaBase,
-                        CotacaoCompra = Formats.ConvertToDecimal(compra),
-                        CotacaoVenda = Formats.ConvertToDecimal(venda),
-                        ParidadeCompra = Formats.ConvertToDecimal(paridadeCompra),
-                        ParidadeVenda = Formats.ConvertToDecimal(paridadeVenda),
-                        Data = Formats.ConvertToDateTime(data)
+                        CotacaoCompra = compra.ToDecimal(),
+                        CotacaoVenda = venda.ToDecimal(),
+                        ParidadeCompra = paridadeCompra.ToDecimal(),
+                        ParidadeVenda = paridadeVenda.ToDecimal(),
+                        Data = data.ToDateTime()
                     };
 
                     cotacoes.Add(cotacao);

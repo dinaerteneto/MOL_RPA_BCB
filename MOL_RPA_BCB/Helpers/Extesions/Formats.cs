@@ -1,18 +1,17 @@
 ﻿using System.Globalization;
 using Exceptions;
 
-namespace Helpers.Formats
+namespace Helpers.Extensions
 {
-    public static class Formats
+    public static class StringExtensions
     {
         /// <summary>
         /// Converte uma string para DateTime usando o formato brasileiro.
         /// </summary>
         /// <param name="dataString">A string representando a data.</param>
         /// <returns>Retorna a data convertida para DateTime.</returns>
-        public static DateTime ConvertToDateTime(string dataString)
+        public static DateTime ToDateTime(this string dataString)
         {
-            // Usando o formato brasileiro (dia/mês/ano)
             DateTime result;
             if (DateTime.TryParseExact(dataString, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
             {
@@ -30,7 +29,7 @@ namespace Helpers.Formats
         /// </summary>
         /// <param name="numeroString">A string representando o número.</param>
         /// <returns>Retorna o número convertido para decimal.</returns>
-        public static decimal ConvertToDecimal(string numeroString)
+        public static decimal ToDecimal(this string numeroString)
         {
             // Substituindo a vírgula por ponto para conversão correta
             decimal result;
@@ -43,7 +42,5 @@ namespace Helpers.Formats
                 throw new HelperException("Número inválido fornecido para conversão.");
             }
         }
-
     }
 }
-
