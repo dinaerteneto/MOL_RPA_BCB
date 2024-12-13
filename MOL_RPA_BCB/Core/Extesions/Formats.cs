@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Exceptions;
 
-namespace Helpers.Extensions
+namespace Core.Extesions
 {
     public static class StringExtensions
     {

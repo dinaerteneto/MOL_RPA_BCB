@@ -1,4 +1,4 @@
-﻿namespace Helpers
+﻿namespace Core
 {
     public static class ConfigurationHelper
     {

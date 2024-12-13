@@ -1,6 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
-using Helpers.Extensions;
+using Core.Extesions;
 
 namespace Services.Cotacao
 {

@@ -1,9 +1,9 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using Core.Logging;
-using Helpers;
 using Services.Quotation;
 using Models;
+using Core;
 class Program
 {
     static async Task Main(string[] args)

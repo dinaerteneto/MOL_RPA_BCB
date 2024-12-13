@@ -361,3 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/MOL_RPA_BCB/Services/Quotation/INavigationStep.cs
